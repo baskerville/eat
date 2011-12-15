@@ -42,7 +42,7 @@
 
 ## Prerequisites
 
-A [ge.tt](http://ge.tt) account and an API key.
+A [Ge.tt](http://ge.tt) account and an API key.
 
 ## Configuration
 
