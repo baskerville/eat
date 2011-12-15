@@ -47,3 +47,7 @@ Create a `~/.eatrc`:
     apikey = one
     email = two@three.four
     password = five
+
+## Dependencies
+
+`python3`
