@@ -1,6 +1,5 @@
 ![preview](http://blobs.ge.tt/4EcnB8B/eat_logo.jpg?sig=-TRC14CWY8O0jOfieb8sCjmmSIDj5ZOXfmk)
 
-
     SYNOPSIS
         eat <action> [arguments]
 
@@ -40,3 +39,11 @@
 
         thumb SHARENAME FILEID
             Returns the URL of the content of the thumbnail of the file FILEID of the share SHARENAME.
+
+## Configuration
+
+Create a `~/.eatrc`:
+
+    apikey = one
+    email = two@three.four
+    password = five
