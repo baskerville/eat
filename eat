@@ -11,20 +11,21 @@ SESSION_PATH = expanduser('~/.eat_session')
 SERVER_DOMAIN = 'open.ge.tt'
 SERVER_URL_PREFIX = '/1'
 SERVER_HEADER = {'Content-Type' : 'application/json'}
-NON_SECURE_ACTIONS = [ 'upload' ]
-ACT_REQ_MAP = {'!login'  : ['POST', '/users/login'],
-               '!status' : ['GET', '/users/me'],
-               'list'    : ['GET', '/shares?accesstoken=%s'],
-               'show'    : ['GET', '/shares/%s'],
-               'info'    : ['GET', '/files/%s/%s'],
-               'add'     : ['POST', '/shares/create?accesstoken=%s'],
-               'change'  : ['POST', '/shares/%s/update?accesstoken=%s'],
-               'remove'  : ['POST', '/shares/%s/destroy?accesstoken=%s'],
-               'delete'  : ['POST', '/files/%s/%s/destroy?accesstoken=%s'],
-               'upload'  : ['POST', '/files/%s/create?accesstoken=%s'],
-               '!renew'  : ['GET', '/files/%s/%s/upload?accesstoken=%s'],
-               'blob'    : ['GET', '/files/%s/%s/blob'],
-               'thumb'   : ['GET', '/files/%s/%s/blob/thumb']}
+NON_SECURE_ACTIONS = [ 'upload', 'link' ]
+ACT_REQ_MAP = {'!login' : ['POST', '/users/login'],
+               'status' : ['GET', '/users/me?accesstoken=%s'],
+               'list'   : ['GET', '/shares?accesstoken=%s'],
+               'show'   : ['GET', '/shares/%s'],
+               'info'   : ['GET', '/files/%s/%s'],
+               'add'    : ['POST', '/shares/create?accesstoken=%s'],
+               'change' : ['POST', '/shares/%s/update?accesstoken=%s'],
+               'remove' : ['POST', '/shares/%s/destroy?accesstoken=%s'],
+               'delete' : ['POST', '/files/%s/%s/destroy?accesstoken=%s'],
+               'upload' : ['POST', '/files/%s/create?accesstoken=%s'],
+               '!renew' : ['GET', '/files/%s/%s/upload?accesstoken=%s'],
+               'blob'   : ['GET', '/files/%s/%s/blob'],
+               'link'   : ['GET', 'http://api2.ge.tt/0/%s/%s/blob/scale/x860'],
+               'thumb'  : ['GET', '/files/%s/%s/blob/thumb']}
 
 settings = {}
 connection = None
@@ -54,7 +55,8 @@ def print_file(file_dict):
     file_name = file_dict['filename']
     gett_url = file_dict['getturl']
     size = format_size(file_dict['size'])
-    print('%3s  %s  %s  %s' % (file_id, file_name, gett_url, size))
+    print('{fileid:>3s}  {filename:<28s}  {getturl:s}  {size:>6s}'\
+          .format(fileid = file_id, filename = file_name, getturl = gett_url, size = size))
 
 def print_share(share_dict):
     title = ''
@@ -84,6 +86,22 @@ def list_shares():
     for s in shares:
         print_share(s)
         print()
+
+def show_status():
+    msg, short_url = ACT_REQ_MAP['status']
+    url_params = tuple([access_token])
+    request(msg, short_url, url_params = url_params)
+    data = handle_response()
+    body = json.loads(data)
+    limit = format_size(body['storage']['limit'] + body['storage']['extra'])
+    used = format_size(body['storage']['used'])
+    full_name = body['fullname']
+    email = body['email']
+    user_line = '%s  %s' % (full_name, email)
+    if sys.stdout.isatty():
+        user_line = grey(user_line)
+    print(user_line)
+    print('%s / %s' % (used, limit))
 
 def locate_item(action, pattern):
     shares = get_shares()
@@ -155,7 +173,7 @@ def delete_file(args):
 
 def get_redirect(action, args):
     msg, short_url = ACT_REQ_MAP[action]
-    request(msg, short_url, url_params = args)
+    request(msg, short_url, url_params = args, action = action)
     handle_response()
 
 def upload_file(share, file_path):
@@ -172,22 +190,28 @@ def upload_file(share, file_path):
     msg = 'PUT'
     put_url = body['upload']['puturl']
     url_seg = re.match('http://([^/]+)(/.*)', put_url)
-    put_domain, long_url = url_seg.groups()
-    make_connection('upload', put_domain)
+    domain, long_url = url_seg.groups()
+    make_connection('upload', domain)
     f = open(expanduser(file_path), 'rb')
     request(msg, long_url, f, short_is_long = True)
     f.close()
 
-def request(msg, short_url, req_params = {}, url_params = [], header = SERVER_HEADER, short_is_long = False):
+def request(msg, short_url, req_params = {}, url_params = [], header = SERVER_HEADER, short_is_long = False, action = None):
     global connection
     long_url = None
     if short_is_long:
         long_url = short_url
+    elif re.match('^http', short_url):
+        long_url = (short_url % url_params)
+        url_seg = re.match('http://([^/]+)(/.*)', long_url)
+        domain, long_url = url_seg.groups()
+        make_connection(action, domain)
     else:
         if len(url_params) > 0:
             long_url = SERVER_URL_PREFIX + (short_url % url_params)
         else:
             long_url = SERVER_URL_PREFIX + short_url
+
     if msg == 'GET':
         connection.request(msg, long_url)
     elif msg == 'POST':
@@ -198,6 +222,8 @@ def request(msg, short_url, req_params = {}, url_params = [], header = SERVER_HE
 
 def make_connection(action, domain = SERVER_DOMAIN):
     global connection
+    if connection != None:
+        connection.close()
     if action in NON_SECURE_ACTIONS:
         connection = http.client.HTTPConnection(domain)
     else:
@@ -319,16 +345,18 @@ def main():
     action = args[0]
     args = tuple(args[1:])
 
-    if action in ['info', 'delete', 'blob', 'thumb'] and len(args) != 2 \
+    if action in ['info', 'delete', 'blob', 'thumb', 'link'] and len(args) != 2 \
     or action in ['show', 'remove'] and len(args) != 1 \
     or action in ['change', 'upload'] and len(args) < 2 \
     or action in ['search', 'find'] and len(args) < 1 \
-    or action in ['list'] and len(args) > 0:
+    or action in ['list', 'status'] and len(args) > 0:
         print('wrong number of arguments', file=sys.stderr)
         sys.exit(1)
 
     if action == 'list':
         list_shares()
+    elif action == 'status':
+        show_status()
     elif action == 'add':
         if len(args) > 0:
             title = ' '.join(args)
@@ -339,12 +367,13 @@ def main():
         share = args[0]
         for file_path in args[1:]:
             upload_file(share, expanduser(file_path))
+            init()
         sys.exit(1)
     elif action == 'change':
         share = args[0]
         title = ' '.join(args[1:])
         change_share(share, title)
-    elif action == 'blob' or action == 'thumb':
+    elif action == 'blob' or action == 'thumb' or action == 'link':
         get_redirect(action, args)
     elif action == 'search' or action == 'find':
         pattern = ' '.join(args)
