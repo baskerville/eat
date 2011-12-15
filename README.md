@@ -40,6 +40,10 @@
         thumb SHARENAME FILEID
             Returns the URL of the content of the thumbnail of the file FILEID of the share SHARENAME.
 
+## Prerequisites
+
+A [ge.tt](http://ge.tt) account and an API key.
+
 ## Configuration
 
 Create a `~/.eatrc`:
