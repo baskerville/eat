@@ -2,7 +2,7 @@
 
 
     SYNOPSIS
-        %s <action> [arguments]
+        eat <action> [arguments]
 
     ACTIONS 
         list
