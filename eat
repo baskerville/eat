@@ -11,7 +11,7 @@ SESSION_PATH = expanduser('~/.eat_session')
 SERVER_DOMAIN = 'open.ge.tt'
 SERVER_URL_PREFIX = '/1'
 SERVER_HEADER = {'Content-Type' : 'application/json'}
-NON_SECURE_ACTIONS = [ 'upload', 'link' ]
+NON_SECURE_ACTIONS = [ 'upload' ]
 ACT_REQ_MAP = {'!login' : ['POST', '/users/login'],
                'status' : ['GET', '/users/me?accesstoken=%s'],
                'list'   : ['GET', '/shares?accesstoken=%s'],
@@ -24,7 +24,6 @@ ACT_REQ_MAP = {'!login' : ['POST', '/users/login'],
                'upload' : ['POST', '/files/%s/create?accesstoken=%s'],
                '!renew' : ['GET', '/files/%s/%s/upload?accesstoken=%s'],
                'blob'   : ['GET', '/files/%s/%s/blob'],
-               'link'   : ['GET', 'http://api2.ge.tt/0/%s/%s/blob/scale/x860'],
                'thumb'  : ['GET', '/files/%s/%s/blob/thumb']}
 
 settings = {}
@@ -201,11 +200,6 @@ def request(msg, short_url, req_params = {}, url_params = [], header = SERVER_HE
     long_url = None
     if short_is_long:
         long_url = short_url
-    elif re.match('^http', short_url):
-        long_url = (short_url % url_params)
-        url_seg = re.match('http://([^/]+)(/.*)', long_url)
-        domain, long_url = url_seg.groups()
-        make_connection(action, domain)
     else:
         if len(url_params) > 0:
             long_url = SERVER_URL_PREFIX + (short_url % url_params)
@@ -302,6 +296,9 @@ ACTIONS
     list
         Output a list of all the shares and files.
 
+    status
+        Show informations relative to the user.
+
     add [TITLE]
         Make a new share.
 
@@ -345,7 +342,7 @@ def main():
     action = args[0]
     args = tuple(args[1:])
 
-    if action in ['info', 'delete', 'blob', 'thumb', 'link'] and len(args) != 2 \
+    if action in ['info', 'delete', 'blob', 'thumb'] and len(args) != 2 \
     or action in ['show', 'remove'] and len(args) != 1 \
     or action in ['change', 'upload'] and len(args) < 2 \
     or action in ['search', 'find'] and len(args) < 1 \
@@ -373,7 +370,7 @@ def main():
         share = args[0]
         title = ' '.join(args[1:])
         change_share(share, title)
-    elif action == 'blob' or action == 'thumb' or action == 'link':
+    elif action == 'blob' or action == 'thumb'
         get_redirect(action, args)
     elif action == 'search' or action == 'find':
         pattern = ' '.join(args)
