@@ -54,7 +54,7 @@ def print_file(file_dict):
     file_name = file_dict['filename']
     gett_url = file_dict['getturl']
     size = format_size(file_dict['size'])
-    print('{fileid:>3s}  {filename:<28s}  {getturl:s}  {size:>6s}'\
+    print('{fileid:>3s}  {filename:<28s}  {size:>6s}  {getturl:s}'\
           .format(fileid = file_id, filename = file_name, getturl = gett_url, size = size))
 
 def print_share(share_dict):
