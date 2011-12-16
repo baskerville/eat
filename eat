@@ -370,7 +370,7 @@ def main():
         share = args[0]
         title = ' '.join(args[1:])
         change_share(share, title)
-    elif action == 'blob' or action == 'thumb'
+    elif action == 'blob' or action == 'thumb':
         get_redirect(action, args)
     elif action == 'search' or action == 'find':
         pattern = ' '.join(args)
