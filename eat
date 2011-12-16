@@ -297,7 +297,7 @@ ACTIONS
         Output a list of all the shares and files.
 
     status
-        Show informations relative to the user.
+        Display informations regarding the current user.
 
     add [TITLE]
         Make a new share.

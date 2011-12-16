@@ -7,6 +7,9 @@
         list
             Output a list of all the shares and files.
 
+        status
+            Display informations regarding the current user.
+
         add [TITLE]
             Make a new share.
 
