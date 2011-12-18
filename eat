@@ -63,9 +63,9 @@ def print_file(file_dict):
 def print_share(share_dict):
     title = ''
     if 'title' in share_dict:
-        title = share_dict['title']
+        title = '%s  ' % share_dict['title']
     share_name = share_dict['sharename']
-    share_line = '%s  %s' % (title, share_name)
+    share_line = '%s%s' % (title, share_name)
     if sys.stdout.isatty():
         share_line = grey(share_line)
     print(share_line)
