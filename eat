@@ -54,8 +54,11 @@ def print_file(file_dict):
     file_name = file_dict['filename']
     gett_url = file_dict['getturl']
     size = format_size(file_dict['size'])
-    print('{fileid:>3s}  {filename:<28s}  {size:>6s}  {getturl:s}'\
-          .format(fileid = file_id, filename = file_name, getturl = gett_url, size = size))
+    created = time.strftime('%Y-%m-%d %H:%M', time.localtime(file_dict['created']))
+    downloads = file_dict['downloads']
+    print('{fileid:>3s}  {filename:<28s}  {size:>6s}  {created:s}  {getturl:s}  {downloads:>3d}'\
+          .format(fileid = file_id, filename = file_name, getturl = gett_url, \
+                  size = size, created = created, downloads = downloads))
 
 def print_share(share_dict):
     title = ''
@@ -386,6 +389,9 @@ def main():
         show_share(args)
     elif action == 'info':
         file_info(args)
+    else:
+        print("action '{}' is unknown".format(action), file=sys.stderr)
+        sys.exit(1)
 
 if __name__ == '__main__':
     main()
