@@ -56,9 +56,8 @@ def print_file(file_dict):
     size = format_size(file_dict['size'])
     created = time.strftime('%Y-%m-%d %H:%M', time.localtime(file_dict['created']))
     downloads = file_dict['downloads']
-    print('{fileid:>3s}  {filename:<28s}  {size:>6s}  {created:s}  {getturl:s}  {downloads:>3d}'\
-          .format(fileid = file_id, filename = file_name, getturl = gett_url, \
-                  size = size, created = created, downloads = downloads))
+    print('{0:>3}  {1:<28}  {2:>6}  {3}  {4}  {5:>3}'\
+          .format(file_id, file_name, size, created, gett_url, downloads))
 
 def print_share(share_dict):
     title = ''
