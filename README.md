@@ -1,4 +1,4 @@
-![preview](http://blobs.ge.tt/4EcnB8B/eat_logo.jpg?sig=-TRiOISsxejMi-WfIcaGYFbkojvmadFHYzg)
+![preview](https://github.com/baskerville/eat/raw/master/preview/eat_logo.jpg)
 
     SYNOPSIS
         eat <action> [arguments]
