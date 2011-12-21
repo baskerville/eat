@@ -1,4 +1,4 @@
-![preview](http://f.cl.ly/items/1h430t3Y1u1t0h352l2O/eat_logo.jpg)
+![preview](http://blobs.ge.tt/4EcnB8B/eat_logo.jpg?sig=-TRiOISsxejMi-WfIcaGYFbkojvmadFHYzg)
 
     SYNOPSIS
         eat <action> [arguments]
@@ -6,6 +6,9 @@
     ACTIONS 
         list
             Output a list of all the shares and files.
+
+        names
+            Output a list of all the shares names.
 
         status
             Display informations regarding the current user.

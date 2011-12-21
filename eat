@@ -2,7 +2,6 @@
 
 import re, sys, json, time
 from os.path import expanduser, exists, getmtime, basename
-from getopt import getopt
 from pprint import pprint
 import http.client
 import urllib.request
@@ -50,6 +49,15 @@ def format_size(value):
         else:
             return '%.1fG' % n
 
+def get_shares():
+    global access_token
+    msg, short_url = ACT_REQ_MAP['list']
+    url_params = tuple([access_token])
+    request(msg, short_url, url_params = url_params)
+    data = handle_response()
+    shares = json.loads(data)
+    return shares
+
 def print_file(file_dict):
     file_id = file_dict['fileid']
     file_name = file_dict['filename']
@@ -73,21 +81,17 @@ def print_share(share_dict):
     for f in files:
         print_file(f)
 
-def get_shares():
-    global access_token
-    msg, short_url = ACT_REQ_MAP['list']
-    url_params = tuple([access_token])
-    request(msg, short_url, url_params = url_params)
-    data = handle_response()
-    shares = json.loads(data)
-    return shares
-
 def list_shares():
     shares = get_shares()
     shares = sorted(shares, key = lambda x: x['created'])
     for s in shares:
         print_share(s)
         print()
+
+def list_names():
+    shares = get_shares()
+    for s in shares:
+        print(s['sharename'])
 
 def show_status():
     msg, short_url = ACT_REQ_MAP['status']
@@ -316,6 +320,9 @@ ACTIONS
     list
         Output a list of all the shares and files.
 
+    names
+        Output a list of all the shares names.
+
     status
         Display informations regarding the current user.
 
@@ -375,6 +382,8 @@ def main():
 
     if action == 'list':
         list_shares()
+    if action == 'names':
+        list_names()
     elif action == 'status':
         show_status()
     elif action == 'add':

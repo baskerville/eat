@@ -1,0 +1,31 @@
+# vim: set ft=sh:
+
+_eat()
+{
+    COMPREPLY=()
+
+    if [[ $COMP_CWORD -ge 1 ]] ; then
+        local current_word="${COMP_WORDS[COMP_CWORD]}"
+        if [[ $COMP_CWORD -eq 1 ]] ; then
+            local actions='list names status add change remove show search upload download delete info find blob thumb'
+            COMPREPLY=( $(compgen -W "$actions" -- "$current_word") )
+            return 0
+        else
+            local second_word=${COMP_WORDS[1]}
+            case $second_word in
+                change | remove | show | upload | delete | info | blob | thumb)
+                    if [[ $COMP_CWORD -eq 2 ]] ; then
+                        sharenames="$(eat names)"
+                        COMPREPLY=( $(compgen -W "$sharenames" -- "$current_word") )
+                        return 0
+                    fi
+                    ;;
+            esac
+            compopt -o filenames
+            COMPREPLY=( $(compgen -f "$current_word") )
+            return 0
+        fi
+    fi
+}
+
+complete -F _eat eat
