@@ -5,6 +5,7 @@ from os.path import expanduser, exists, getmtime, basename
 from getopt import getopt
 from pprint import pprint
 import http.client
+import urllib.request
 
 CONFIG_PATH = expanduser('~/.eatrc')
 SESSION_PATH = expanduser('~/.eat_session')
@@ -175,7 +176,8 @@ def delete_file(args):
 def get_redirect(action, args):
     msg, short_url = ACT_REQ_MAP[action]
     request(msg, short_url, url_params = args, action = action)
-    handle_response()
+    redirect_url = handle_response()
+    print(redirect_url)
 
 def upload_file(share, file_path):
     file_name = basename(file_path)
@@ -196,6 +198,22 @@ def upload_file(share, file_path):
     f = open(expanduser(file_path), 'rb')
     request(msg, long_url, f, short_is_long = True)
     f.close()
+
+def download_file(args):
+    action = 'blob'
+    msg, short_url = ACT_REQ_MAP[action]
+    request(msg, short_url, url_params = args, action = action)
+    redirect_url = handle_response()
+    start_of_name = redirect_url.rfind('/') + 1
+    end_of_name = redirect_url.rfind('?')
+
+    if end_of_name == -1:
+        file_name = redirect_url[start_of_name:]
+    else:
+        file_name = redirect_url[start_of_name:end_of_name]
+
+    urllib.request.urlretrieve(redirect_url, file_name)
+
 
 def request(msg, short_url, req_params = {}, url_params = [], header = SERVER_HEADER, short_is_long = False, action = None):
     global connection
@@ -262,10 +280,10 @@ def handle_response():
     resp = connection.getresponse()
     if resp.status != 200:
         if resp.status == 307:
-            print(resp.msg['location'])
+            return resp.msg['location']
         else:
             print('server replied: %s %s' % (resp.status, resp.reason), file = sys.stderr)
-        sys.exit(1)
+            sys.exit(1)
     data = resp.read().decode('utf-8')
     return data
 
@@ -319,6 +337,9 @@ ACTIONS
     upload SHARENAME FILE ...
         Upload the given files to the share SHARENAME.
 
+    download SHARENAME FILEID
+        Download the file FILEID of the share SHARENAME.
+
     delete SHARENAME FILEID
         Delete the file FILEID of the share SHARENAME.
 
@@ -367,7 +388,8 @@ def main():
         for file_path in args[1:]:
             upload_file(share, expanduser(file_path))
             init()
-        sys.exit(1)
+    elif action == 'download':
+        download_file(args)
     elif action == 'change':
         share = args[0]
         title = ' '.join(args[1:])
