@@ -2,7 +2,6 @@
 
 import re, sys, json, time
 from os.path import expanduser, exists, getmtime, basename
-from pprint import pprint
 import http.client
 import urllib.request
 
