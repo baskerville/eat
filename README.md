@@ -28,6 +28,9 @@
         upload SHARENAME FILE ...
             Upload the given files to the share SHARENAME.
 
+        download SHARENAME FILEID
+            Download the file FILEID of the share SHARENAME.
+
         delete SHARENAME FILEID
             Delete the file FILEID of the share SHARENAME.
 
