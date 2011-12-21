@@ -382,7 +382,7 @@ def main():
 
     if action == 'list':
         list_shares()
-    if action == 'names':
+    elif action == 'names':
         list_names()
     elif action == 'status':
         show_status()
