@@ -43,6 +43,9 @@
         find PATTERN
             Search for files whose file name matches PATTERN.
 
+        url SHARENAME FILEID
+            Returns the URL of the file FILEID of the share SHARENAME.
+
         blob SHARENAME FILEID
             Returns the URL of the content of the file FILEID of the share SHARENAME.
 
